@@ -12,24 +12,29 @@ public class Server {
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendSocket, receiveSocket;
 
+	final int serverPortNum = 69;
+	final int maxByteArraySize = 100;
+
 	public Server() {
 		try {
 			sendSocket = new DatagramSocket();
-
-			receiveSocket = new DatagramSocket(5000);
-
+			receiveSocket = new DatagramSocket(serverPortNum);
 		} catch (SocketException se) {
 			se.printStackTrace();
 			System.exit(1);
 		}
 	}
 
-	public void receiveAndEcho() {
+	/**
+	 * This method recieves a message from the Client via the Host. It then sends a
+	 * response back to the Client via the Host.
+	 */
+	public void receiveAndSend() {
 
-		byte data[] = new byte[100];
+		// Get the message from the Host
+		byte data[] = new byte[maxByteArraySize];
 		receivePacket = new DatagramPacket(data, data.length);
-		System.out.println("Server: Waiting for Packet.\n");
-
+		System.out.println("Server: Waiting for Packet from the Host.");
 		try {
 			System.out.println("Waiting...");
 			receiveSocket.receive(receivePacket);
@@ -39,7 +44,6 @@ public class Server {
 			e.printStackTrace();
 			System.exit(1);
 		}
-
 		Date date = new Date();
 		DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
 		formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
@@ -50,10 +54,8 @@ public class Server {
 		int len = receivePacket.getLength();
 		System.out.println("Length: " + len);
 		System.out.print("Containing: ");
-
 		String received = new String(data, 0, len);
 		System.out.println(received + "\n");
-
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
@@ -61,10 +63,10 @@ public class Server {
 			System.exit(1);
 		}
 
+		// Send the response to the Host
 		sendPacket = new DatagramPacket(data, receivePacket.getLength(), receivePacket.getAddress(),
 				receivePacket.getPort());
-
-		System.out.println("Server: Sending packet:");
+		System.out.println("Server: Sending packet to Host:");
 		System.out.println("To host: " + sendPacket.getAddress());
 		System.out.println("Destination host port: " + sendPacket.getPort());
 		len = sendPacket.getLength();
@@ -77,17 +79,15 @@ public class Server {
 			e.printStackTrace();
 			System.exit(1);
 		}
-
 		date = new Date();
 		dateFormatted = formatter.format(date);
 		System.out.println("Server: packet sent at " + dateFormatted);
-
 		sendSocket.close();
 		receiveSocket.close();
 	}
 
 	public static void main(String args[]) {
 		Server server = new Server();
-		server.receiveAndEcho();
+		server.receiveAndSend();
 	}
 }
