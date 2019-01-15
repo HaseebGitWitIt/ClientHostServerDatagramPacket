@@ -11,10 +11,10 @@ import java.util.TimeZone;
 
 public class Client {
 
-	DatagramPacket sendPacket, receivePacket;
-	DatagramSocket sendReceiveSocket;
-	final int hostPortNum = 23;
-	final int maxByteArraySize = 100;
+	private DatagramPacket sendPacket, recievePacket;
+	private DatagramSocket sendReceiveSocket;
+	private final int HOST_PORT_NUM = 23;
+	private final int MAX_BYTE_ARRAY_SIZE = 100;
 
 	public Client() {
 		try {
@@ -29,14 +29,14 @@ public class Client {
 	 * This method generates a message to send to the Server via the Host. The
 	 * Server then sends a response back via the Host.
 	 */
-	public void sendAndReceive() {
+	private void sendAndReceive() {
 
 		// Send the message to the Host
 		String s = "Anyone there?";
 		System.out.println("Client: Sending packet to Host containing: " + s);
 		byte msg[] = s.getBytes();
 		try {
-			sendPacket = new DatagramPacket(msg, msg.length, InetAddress.getLocalHost(), hostPortNum);
+			sendPacket = new DatagramPacket(msg, msg.length, InetAddress.getLocalHost(), HOST_PORT_NUM);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -61,10 +61,10 @@ public class Client {
 		System.out.println("Client: Packet sent at: " + dateFormatted + "\n");
 
 		// Recieve the response from the Host
-		byte data[] = new byte[maxByteArraySize];
-		receivePacket = new DatagramPacket(data, data.length);
+		byte data[] = new byte[MAX_BYTE_ARRAY_SIZE];
+		recievePacket = new DatagramPacket(data, data.length);
 		try {
-			sendReceiveSocket.receive(receivePacket);
+			sendReceiveSocket.receive(recievePacket);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -72,9 +72,9 @@ public class Client {
 		date = new Date();
 		dateFormatted = formatter.format(date);
 		System.out.println("Client: Packet received at " + dateFormatted + " :");
-		System.out.println("From host: " + receivePacket.getAddress());
-		System.out.println("Host port: " + receivePacket.getPort());
-		len = receivePacket.getLength();
+		System.out.println("From host: " + recievePacket.getAddress());
+		System.out.println("Host port: " + recievePacket.getPort());
+		len = recievePacket.getLength();
 		System.out.println("Length: " + len);
 		System.out.print("Containing: ");
 		String received = new String(data, 0, len);

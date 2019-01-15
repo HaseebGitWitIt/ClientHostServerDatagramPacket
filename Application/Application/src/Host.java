@@ -9,16 +9,16 @@ import java.util.TimeZone;
 
 public class Host {
 
-	DatagramPacket sendPacket, clientRecievePacket, serverRecievePacket;
-	DatagramSocket recieveSocket, sendRecieveSocket;
+	private DatagramPacket sendPacket, clientRecievePacket, serverRecievePacket;
+	private DatagramSocket recieveSocket, sendRecieveSocket;
 
-	final int hostPortNum = 23;
-	final int maxByteArraySize = 100;
-	final int serverPortNum = 69;
+	private final int HOST_PORT_NUM = 23;
+	private final int MAX_BYTE_ARRAY_SIZE = 100;
+	private final int SERVER_PORT_NUM = 69;
 
 	public Host() {
 		try {
-			recieveSocket = new DatagramSocket(hostPortNum);
+			recieveSocket = new DatagramSocket(HOST_PORT_NUM);
 			sendRecieveSocket = new DatagramSocket();
 		} catch (SocketException se) {
 			se.printStackTrace();
@@ -30,10 +30,10 @@ public class Host {
 	 * This method recieves a message from the Client, and then sends it to the
 	 * Server. The Server then sends a response, which is then sent to the Client.
 	 */
-	public void recieveAndSend() {
+	private void recieveAndSend() {
 
 		// Get the message from the Client
-		byte data[] = new byte[maxByteArraySize];
+		byte data[] = new byte[MAX_BYTE_ARRAY_SIZE];
 		clientRecievePacket = new DatagramPacket(data, data.length);
 		System.out.println("Host: Waiting for Packet from Client.");
 		try {
@@ -66,7 +66,7 @@ public class Host {
 
 		// Send the message from the Client to the Server
 		sendPacket = new DatagramPacket(data, clientRecievePacket.getLength(), clientRecievePacket.getAddress(),
-				serverPortNum);
+				SERVER_PORT_NUM);
 		System.out.println("Host: Sending packet to Server:");
 		System.out.println("To host: " + sendPacket.getAddress());
 		System.out.println("Destination host port: " + sendPacket.getPort());
@@ -86,7 +86,7 @@ public class Host {
 		System.out.println("Server: packet sent at " + dateFormatted + "\n");
 
 		// Recieve response from Server
-		data = new byte[maxByteArraySize];
+		data = new byte[MAX_BYTE_ARRAY_SIZE];
 		serverRecievePacket = new DatagramPacket(data, data.length);
 		System.out.println("Host: Waiting for Packet from Server.");
 		try {
@@ -142,7 +142,10 @@ public class Host {
 	}
 
 	public static void main(String args[]) {
-		Host host = new Host();
-		host.recieveAndSend();
+		while (true) {
+			Host host = new Host();
+			host.recieveAndSend();
+		}
+
 	}
 }

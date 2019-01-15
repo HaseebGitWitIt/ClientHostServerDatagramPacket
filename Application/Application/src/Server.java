@@ -9,16 +9,16 @@ import java.util.TimeZone;
 
 public class Server {
 
-	DatagramPacket sendPacket, receivePacket;
-	DatagramSocket sendSocket, receiveSocket;
+	private DatagramPacket sendPacket, receivePacket;
+	private DatagramSocket sendSocket, receiveSocket;
 
-	final int serverPortNum = 69;
-	final int maxByteArraySize = 100;
+	private final int SERVER_PORT_NUM = 69;
+	private final int MAX_BYTE_ARRAY_SIZE = 100;
 
 	public Server() {
 		try {
 			sendSocket = new DatagramSocket();
-			receiveSocket = new DatagramSocket(serverPortNum);
+			receiveSocket = new DatagramSocket(SERVER_PORT_NUM);
 		} catch (SocketException se) {
 			se.printStackTrace();
 			System.exit(1);
@@ -29,10 +29,10 @@ public class Server {
 	 * This method recieves a message from the Client via the Host. It then sends a
 	 * response back to the Client via the Host.
 	 */
-	public void receiveAndSend() {
+	private void receiveAndSend() {
 
 		// Get the message from the Host
-		byte data[] = new byte[maxByteArraySize];
+		byte data[] = new byte[MAX_BYTE_ARRAY_SIZE];
 		receivePacket = new DatagramPacket(data, data.length);
 		System.out.println("Server: Waiting for Packet from the Host.");
 		try {
@@ -87,7 +87,10 @@ public class Server {
 	}
 
 	public static void main(String args[]) {
-		Server server = new Server();
-		server.receiveAndSend();
+		while (true) {
+			Server server = new Server();
+			server.receiveAndSend();
+		}
+
 	}
 }
