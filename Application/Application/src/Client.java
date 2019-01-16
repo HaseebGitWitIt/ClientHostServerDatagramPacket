@@ -10,15 +10,17 @@ import java.util.Arrays;
 public class Client {
 
 	private DatagramPacket sendPacket, recievePacket;
-	private DatagramSocket sendReceiveSocket;
+	private DatagramSocket sendRecieveSocket;
 	private final int HOST_PORT_NUM = 23;
 	private final int MAX_BYTE_ARRAY_SIZE = 100;
 	private final String READ_REQUEST = "READ";
 	private final String WRITE_REQUEST = "WRITE";
+	private final int TIMEOUT_TIME = 30000;
+	private final int CANCEL_TIMEOUT = 0;
 
 	public Client() {
 		try {
-			sendReceiveSocket = new DatagramSocket();
+			sendRecieveSocket = new DatagramSocket();
 		} catch (SocketException se) {
 			se.printStackTrace();
 			System.exit(1);
@@ -31,7 +33,7 @@ public class Client {
 	 */
 	private void sendAndReceive() {
 
-		for (int a = 0; a <= 0; a++) {
+		for (int a = 0; a <= 10; a++) {
 			// Send the message to the Host
 			byte msg[] = null;
 			if (a == 10) {
@@ -57,7 +59,7 @@ public class Client {
 			System.out.print("Containing (Byte): ");
 			System.out.println(Arrays.toString(sendPacket.getData()) + "\n");
 			try {
-				sendReceiveSocket.send(sendPacket);
+				sendRecieveSocket.send(sendPacket);
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(1);
@@ -72,7 +74,9 @@ public class Client {
 			byte data[] = new byte[MAX_BYTE_ARRAY_SIZE];
 			recievePacket = new DatagramPacket(data, data.length);
 			try {
-				sendReceiveSocket.receive(recievePacket);
+				sendRecieveSocket.setSoTimeout(TIMEOUT_TIME);
+				sendRecieveSocket.receive(recievePacket);
+				sendRecieveSocket.setSoTimeout(CANCEL_TIMEOUT);
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(1);
@@ -91,7 +95,7 @@ public class Client {
 			System.out.println(Arrays.toString(data) + "\n");
 		}
 
-		sendReceiveSocket.close();
+		sendRecieveSocket.close();
 	}
 
 	private byte[] getRequestMessage(String readOrWrite) {

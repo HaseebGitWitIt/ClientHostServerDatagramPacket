@@ -17,6 +17,8 @@ public class Host {
 	private final int HOST_PORT_NUM = 23;
 	private final int MAX_BYTE_ARRAY_SIZE = 100;
 	private final int SERVER_PORT_NUM = 69;
+	private final int TIMEOUT_TIME = 30000;
+	private final int CANCEL_TIMEOUT = 0;
 
 	public Host() {
 		try {
@@ -97,7 +99,9 @@ public class Host {
 		System.out.println("Host: Waiting for Packet from Server.");
 		try {
 			System.out.println("Waiting...");
+			sendRecieveSocket.setSoTimeout(TIMEOUT_TIME);
 			sendRecieveSocket.receive(serverRecievePacket);
+			sendRecieveSocket.setSoTimeout(CANCEL_TIMEOUT);
 		} catch (IOException e) {
 			System.out.print("IO Exception: likely:");
 			System.out.println("Receive Socket Timed Out.\n" + e);

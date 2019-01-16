@@ -11,8 +11,8 @@ import java.util.TimeZone;
 
 public class Server {
 
-	private DatagramPacket sendPacket, receivePacket;
-	private DatagramSocket sendSocket, receiveSocket;
+	private DatagramPacket sendPacket, recievePacket;
+	private DatagramSocket sendSocket, recieveSocket;
 
 	private final int SERVER_PORT_NUM = 69;
 	private final int MAX_BYTE_ARRAY_SIZE = 100;
@@ -22,7 +22,7 @@ public class Server {
 	public Server() {
 		try {
 			sendSocket = new DatagramSocket();
-			receiveSocket = new DatagramSocket(SERVER_PORT_NUM);
+			recieveSocket = new DatagramSocket(SERVER_PORT_NUM);
 		} catch (SocketException se) {
 			se.printStackTrace();
 			System.exit(1);
@@ -32,16 +32,18 @@ public class Server {
 	/**
 	 * This method recieves a message from the Client via the Host. It then sends a
 	 * response back to the Client via the Host.
+	 * 
+	 * @throws InvalidPacketException
 	 */
-	private void receiveAndSend() {
+	private void receiveAndSend() throws InvalidPacketException {
 
 		// Get the message from the Host
 		byte data[] = new byte[MAX_BYTE_ARRAY_SIZE];
-		receivePacket = new DatagramPacket(data, data.length);
+		recievePacket = new DatagramPacket(data, data.length);
 		System.out.println("Server: Waiting for Packet from the Host.");
 		try {
 			System.out.println("Waiting...");
-			receiveSocket.receive(receivePacket);
+			recieveSocket.receive(recievePacket);
 		} catch (IOException e) {
 			System.out.print("IO Exception: likely:");
 			System.out.println("Receive Socket Timed Out.\n" + e);
@@ -70,9 +72,9 @@ public class Server {
 		}
 
 		// Send the response to the Host
-		byte[] responseData = parseData(data);
-		sendPacket = new DatagramPacket(responseData, responseData.length, receivePacket.getAddress(),
-				receivePacket.getPort());
+		byte[] responseData = parseData(data, recievePacket.getLength());
+		sendPacket = new DatagramPacket(responseData, responseData.length, recievePacket.getAddress(),
+				recievePacket.getPort());
 		System.out.println("Server: Sending packet to Host:");
 //		System.out.println("To host: " + sendPacket.getAddress());
 //		System.out.println("Destination host port: " + sendPacket.getPort());
@@ -92,36 +94,45 @@ public class Server {
 		dateFormatted = formatter.format(date);
 		System.out.println("Server: packet sent at " + dateFormatted + "\n");
 		sendSocket.close();
-		receiveSocket.close();
+		recieveSocket.close();
 	}
 
-	private byte[] parseData(byte[] data) {
-		if (data[0] == 0 && (data[1] == 1 || data[1] == 2)) {
-			for (int a = 2; a < data.length; a++) {
+	private byte[] parseData(byte[] data, int messageLength) throws InvalidPacketException {
+
+		// Verify first 2 positions and last position
+		if ((data[0] == 0 && (data[1] == 1 || data[1] == 2)) && data[messageLength - 1] == 0) {
+			for (int a = 2; a < messageLength - 1; a++) {
 				if (data[a] == 0) {
-					// Filename complete
-					for (int b = a; b < data.length; b++) {
-						if (data[b] == 0) {
-							// Mode complete, nothing else after that
-							if (data[1] == 1) {
-								return VALID_READ_REQUEST_RESPONSE;
-							} else {
-								return VALID_WRITE_REQUEST_RESPONSE;
-							}
+					for (int b = a + 1; b < messageLength - 1; b++) {
+						if (isByteFromText(data[b])) {
+							continue;
+						} else {
+							throw new InvalidPacketException("---INVALID REQUEST SENT TO THE SERVER---");
 						}
 					}
-
-					System.out.println("\n\n---INVALID REQUEST SENT TO THE SERVER---\n");
-					System.exit(0);
+					if (data[1] == 1) {
+						return VALID_READ_REQUEST_RESPONSE;
+					}
+					return VALID_WRITE_REQUEST_RESPONSE;
+				} else if (isByteFromText(data[a])) {
+					continue;
+				} else {
+					throw new InvalidPacketException("---INVALID REQUEST SENT TO THE SERVER---");
 				}
 			}
 		}
-		System.out.println("\n\n---INVALID REQUEST SENT TO THE SERVER---\n");
-		System.exit(0);
-		return null;
+		throw new InvalidPacketException("---INVALID REQUEST SENT TO THE SERVER---");
+
 	}
 
-	public static void main(String args[]) {
+	private boolean isByteFromText(byte byteValue) {
+		if (byteValue >= 32 && byteValue <= 126) {
+			return true;
+		}
+		return false;
+	}
+
+	public static void main(String args[]) throws InvalidPacketException {
 		while (true) {
 			Server server = new Server();
 			server.receiveAndSend();
