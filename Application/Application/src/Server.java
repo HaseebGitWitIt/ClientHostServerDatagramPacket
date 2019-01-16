@@ -5,7 +5,6 @@ import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -63,7 +62,8 @@ public class Server {
 		String received = new String(data, StandardCharsets.UTF_8);
 		System.out.println(received);
 		System.out.print("Containing (Byte): ");
-		System.out.println(Arrays.toString(data) + "\n");
+		// TODO System.out.println(Arrays.toString(data) + "\n");
+		printPacketBytes(recievePacket);
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
@@ -83,7 +83,8 @@ public class Server {
 		System.out.print("Containing (String): ");
 		System.out.println(new String(sendPacket.getData(), StandardCharsets.UTF_8));
 		System.out.print("Containing (Byte): ");
-		System.out.println(Arrays.toString(sendPacket.getData()));
+		// TODO System.out.println(Arrays.toString(sendPacket.getData()));
+		printPacketBytes(sendPacket);
 		try {
 			sendSocket.send(sendPacket);
 		} catch (IOException e) {
@@ -130,6 +131,19 @@ public class Server {
 			return true;
 		}
 		return false;
+	}
+
+	private void printPacketBytes(DatagramPacket bytes) {
+		byte bytesArray[] = bytes.getData();
+		System.out.print("[");
+		for (int a = 0; a < bytes.getLength(); a++) {
+			if (a != (bytes.getLength() - 1)) {
+				System.out.print(bytesArray[a] + ", ");
+			} else {
+				System.out.print(bytesArray[a]);
+			}
+		}
+		System.out.println("] \n");
 	}
 
 	public static void main(String args[]) throws InvalidPacketException {

@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 public class Client {
 
@@ -57,7 +56,8 @@ public class Client {
 			System.out.print("Containing (String): ");
 			System.out.println(new String(sendPacket.getData(), StandardCharsets.UTF_8));
 			System.out.print("Containing (Byte): ");
-			System.out.println(Arrays.toString(sendPacket.getData()) + "\n");
+			// TODO System.out.println(Arrays.toString(sendPacket.getData()) + "\n");
+			printPacketBytes(sendPacket);
 			try {
 				sendRecieveSocket.send(sendPacket);
 			} catch (IOException e) {
@@ -92,7 +92,8 @@ public class Client {
 			String received = new String(data, StandardCharsets.UTF_8);
 			System.out.println(received);
 			System.out.print("Containing (Byte): ");
-			System.out.println(Arrays.toString(data) + "\n");
+			// TODO System.out.println(Arrays.toString(data) + "\n");
+			printPacketBytes(recievePacket);
 		}
 
 		sendRecieveSocket.close();
@@ -128,6 +129,19 @@ public class Client {
 		System.arraycopy(array5, 0, byteArray, array1.length + array2.length + array3.length + array4.length,
 				array5.length);
 		return byteArray;
+	}
+
+	private void printPacketBytes(DatagramPacket bytes) {
+		byte bytesArray[] = bytes.getData();
+		System.out.print("[");
+		for (int a = 0; a < bytes.getLength(); a++) {
+			if (a != (bytes.getLength() - 1)) {
+				System.out.print(bytesArray[a] + ", ");
+			} else {
+				System.out.print(bytesArray[a]);
+			}
+		}
+		System.out.println("] \n");
 	}
 
 	public static void main(String args[]) {
