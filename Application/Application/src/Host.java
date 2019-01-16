@@ -2,8 +2,10 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -50,13 +52,15 @@ public class Host {
 		formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 		String dateFormatted = formatter.format(date);
 		System.out.println("Host: Packet received at " + dateFormatted + " :");
-		System.out.println("From host: " + clientRecievePacket.getAddress());
-		System.out.println("Host port: " + clientRecievePacket.getPort());
-		int len = clientRecievePacket.getLength();
-		System.out.println("Length: " + len);
-		System.out.print("Containing: ");
-		String received = new String(data, 0, len);
-		System.out.println(received + "\n");
+//		System.out.println("From host: " + clientRecievePacket.getAddress());
+//		System.out.println("Host port: " + clientRecievePacket.getPort());
+//		int len = clientRecievePacket.getLength();
+//		System.out.println("Length: " + len);
+		System.out.print("Containing (String): ");
+		String received = new String(data, StandardCharsets.UTF_8);
+		System.out.println(received);
+		System.out.print("Containing (Byte): ");
+		System.out.println(Arrays.toString(data) + "\n");
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
@@ -68,12 +72,14 @@ public class Host {
 		sendPacket = new DatagramPacket(data, clientRecievePacket.getLength(), clientRecievePacket.getAddress(),
 				SERVER_PORT_NUM);
 		System.out.println("Host: Sending packet to Server:");
-		System.out.println("To host: " + sendPacket.getAddress());
-		System.out.println("Destination host port: " + sendPacket.getPort());
-		len = sendPacket.getLength();
-		System.out.println("Length: " + len);
-		System.out.print("Containing: ");
-		System.out.println(new String(sendPacket.getData(), 0, len));
+//		System.out.println("To host: " + sendPacket.getAddress());
+//		System.out.println("Destination host port: " + sendPacket.getPort());
+//		len = sendPacket.getLength();
+//		System.out.println("Length: " + len);
+		System.out.print("Containing (String): ");
+		System.out.println(new String(sendPacket.getData(), StandardCharsets.UTF_8));
+		System.out.print("Containing (Byte): ");
+		System.out.println(Arrays.toString(sendPacket.getData()));
 		try {
 
 			sendRecieveSocket.send(sendPacket);
@@ -103,13 +109,15 @@ public class Host {
 		formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 		dateFormatted = formatter.format(date);
 		System.out.println("Host: Packet received at " + dateFormatted + " :");
-		System.out.println("From host: " + serverRecievePacket.getAddress());
-		System.out.println("Host port: " + serverRecievePacket.getPort());
-		len = serverRecievePacket.getLength();
-		System.out.println("Length: " + len);
-		System.out.print("Containing: ");
-		received = new String(data, 0, len);
-		System.out.println(received + "\n");
+//		System.out.println("From host: " + serverRecievePacket.getAddress());
+//		System.out.println("Host port: " + serverRecievePacket.getPort());
+//		len = serverRecievePacket.getLength();
+//		System.out.println("Length: " + len);
+		System.out.print("Containing (String): ");
+		received = new String(data, StandardCharsets.UTF_8);
+		System.out.println(received);
+		System.out.print("Containing (Byte): ");
+		System.out.println(Arrays.toString(data) + "\n");
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
@@ -121,12 +129,14 @@ public class Host {
 		sendPacket = new DatagramPacket(data, serverRecievePacket.getLength(), serverRecievePacket.getAddress(),
 				clientRecievePacket.getPort());
 		System.out.println("Host: Sending packet to Client:");
-		System.out.println("To host: " + sendPacket.getAddress());
-		System.out.println("Destination host port: " + sendPacket.getPort());
-		len = sendPacket.getLength();
-		System.out.println("Length: " + len);
-		System.out.print("Containing: ");
-		System.out.println(new String(sendPacket.getData(), 0, len));
+//		System.out.println("To host: " + sendPacket.getAddress());
+//		System.out.println("Destination host port: " + sendPacket.getPort());
+//		len = sendPacket.getLength();
+//		System.out.println("Length: " + len);
+		System.out.print("Containing (String): ");
+		System.out.println(new String(sendPacket.getData(), StandardCharsets.UTF_8));
+		System.out.print("Containing (Byte): ");
+		System.out.println(Arrays.toString(sendPacket.getData()));
 		try {
 			sendRecieveSocket.send(sendPacket);
 		} catch (IOException e) {

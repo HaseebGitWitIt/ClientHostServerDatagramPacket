@@ -4,10 +4,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class Client {
 
@@ -15,6 +13,8 @@ public class Client {
 	private DatagramSocket sendReceiveSocket;
 	private final int HOST_PORT_NUM = 23;
 	private final int MAX_BYTE_ARRAY_SIZE = 100;
+	private final String READ_REQUEST = "READ";
+	private final String WRITE_REQUEST = "WRITE";
 
 	public Client() {
 		try {
@@ -31,56 +31,99 @@ public class Client {
 	 */
 	private void sendAndReceive() {
 
-		// Send the message to the Host
-		String s = "Anyone there?";
-		System.out.println("Client: Sending packet to Host containing: " + s);
-		byte msg[] = s.getBytes();
-		try {
-			sendPacket = new DatagramPacket(msg, msg.length, InetAddress.getLocalHost(), HOST_PORT_NUM);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		System.out.println("Client: Sending packet:");
-		System.out.println("To host: " + sendPacket.getAddress());
-		System.out.println("Destination host port: " + sendPacket.getPort());
-		int len = sendPacket.getLength();
-		System.out.println("Length: " + len);
-		System.out.print("Containing: ");
-		System.out.println(new String(sendPacket.getData(), 0, len));
-		try {
-			sendReceiveSocket.send(sendPacket);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		Date date = new Date();
-		DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
-		formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-		String dateFormatted = formatter.format(date);
-		System.out.println("Client: Packet sent at: " + dateFormatted + "\n");
+		for (int a = 0; a <= 0; a++) {
+			// Send the message to the Host
+			byte msg[] = null;
+			if (a == 10) {
+				msg = getRequestMessage("Invalid request");
+			} else if (a % 2 == 0) {
+				msg = getRequestMessage(READ_REQUEST);
+			} else {
+				msg = getRequestMessage(WRITE_REQUEST);
+			}
+			try {
+				sendPacket = new DatagramPacket(msg, msg.length, InetAddress.getLocalHost(), HOST_PORT_NUM);
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			System.out.println("Client: Sending packet #" + a + ":");
+//			System.out.println("To host: " + sendPacket.getAddress());
+//			System.out.println("Destination host port: " + sendPacket.getPort());
+//			int len = sendPacket.getLength();
+//			System.out.println("Length: " + len);
+			System.out.print("Containing (String): ");
+			System.out.println(new String(sendPacket.getData(), StandardCharsets.UTF_8));
+			System.out.print("Containing (Byte): ");
+			System.out.println(Arrays.toString(sendPacket.getData()) + "\n");
+			try {
+				sendReceiveSocket.send(sendPacket);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+//			Date date = new Date();
+//			DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+//			formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+//			String dateFormatted = formatter.format(date);
+//			System.out.println("Client: Packet sent at: " + dateFormatted + "\n");
 
-		// Recieve the response from the Host
-		byte data[] = new byte[MAX_BYTE_ARRAY_SIZE];
-		recievePacket = new DatagramPacket(data, data.length);
-		try {
-			sendReceiveSocket.receive(recievePacket);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
+			// Recieve the response from the Host
+			byte data[] = new byte[MAX_BYTE_ARRAY_SIZE];
+			recievePacket = new DatagramPacket(data, data.length);
+			try {
+				sendReceiveSocket.receive(recievePacket);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+//			date = new Date();
+//			dateFormatted = formatter.format(date);
+			System.out.println("Client: Packet received " /* + dateFormatted */ + " for message #" + a + ":");
+//			System.out.println("From host: " + recievePacket.getAddress());
+//			System.out.println("Host port: " + recievePacket.getPort());
+//			len = recievePacket.getLength();
+//			System.out.println("Length: " + len);
+			System.out.print("Containing (String): ");
+			String received = new String(data, StandardCharsets.UTF_8);
+			System.out.println(received);
+			System.out.print("Containing (Byte): ");
+			System.out.println(Arrays.toString(data) + "\n");
 		}
-		date = new Date();
-		dateFormatted = formatter.format(date);
-		System.out.println("Client: Packet received at " + dateFormatted + " :");
-		System.out.println("From host: " + recievePacket.getAddress());
-		System.out.println("Host port: " + recievePacket.getPort());
-		len = recievePacket.getLength();
-		System.out.println("Length: " + len);
-		System.out.print("Containing: ");
-		String received = new String(data, 0, len);
-		System.out.println(received);
 
 		sendReceiveSocket.close();
+	}
+
+	private byte[] getRequestMessage(String readOrWrite) {
+		String filename = "test.txt";
+		String mode = "ocTEt";
+		byte readBytes[] = { 0, 1 };
+		byte writeBytes[] = { 0, 2 };
+		byte corruptBytes[] = { 1, 2 };
+		byte filenameBytes[] = filename.getBytes();
+		byte modeBytes[] = mode.getBytes();
+		byte zero[] = { 0 };
+
+		if (readOrWrite.equalsIgnoreCase(READ_REQUEST)) {
+			return combineFiveByteArrays(readBytes, filenameBytes, zero, modeBytes, zero);
+		} else if (readOrWrite.equalsIgnoreCase(WRITE_REQUEST)) {
+			return combineFiveByteArrays(writeBytes, filenameBytes, zero, modeBytes, zero);
+		} else {
+			return combineFiveByteArrays(corruptBytes, filenameBytes, zero, modeBytes, zero);
+		}
+
+	}
+
+	private byte[] combineFiveByteArrays(byte[] array1, byte[] array2, byte[] array3, byte[] array4, byte[] array5) {
+		int length = array1.length + array2.length + array3.length + array4.length + array5.length;
+		byte[] byteArray = new byte[length];
+		System.arraycopy(array1, 0, byteArray, 0, array1.length);
+		System.arraycopy(array2, 0, byteArray, array1.length, array2.length);
+		System.arraycopy(array3, 0, byteArray, array1.length + array2.length, array3.length);
+		System.arraycopy(array4, 0, byteArray, array1.length + array2.length + array3.length, array4.length);
+		System.arraycopy(array5, 0, byteArray, array1.length + array2.length + array3.length + array4.length,
+				array5.length);
+		return byteArray;
 	}
 
 	public static void main(String args[]) {
