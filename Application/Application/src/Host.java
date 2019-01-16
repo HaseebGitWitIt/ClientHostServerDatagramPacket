@@ -3,16 +3,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class Host {
 
 	private DatagramPacket sendPacket, clientRecievePacket, serverRecievePacket;
 	private DatagramSocket recieveSocket, sendRecieveSocket;
-
 	private final int HOST_PORT_NUM = 23;
 	private final int MAX_BYTE_ARRAY_SIZE = 100;
 	private final int SERVER_PORT_NUM = 69;
@@ -38,9 +33,8 @@ public class Host {
 		// Get the message from the Client
 		byte data[] = new byte[MAX_BYTE_ARRAY_SIZE];
 		clientRecievePacket = new DatagramPacket(data, data.length);
-		System.out.println("Host: Waiting for Packet from Client.");
 		try {
-			System.out.println("Waiting...");
+			System.out.println("Host: Waiting for packet from Client...");
 			recieveSocket.receive(clientRecievePacket);
 		} catch (IOException e) {
 			System.out.print("IO Exception: likely:");
@@ -48,20 +42,11 @@ public class Host {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		Date date = new Date();
-		DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
-		formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-		String dateFormatted = formatter.format(date);
-		System.out.println("Host: Packet received at " + dateFormatted + " :");
-//		System.out.println("From host: " + clientRecievePacket.getAddress());
-//		System.out.println("Host port: " + clientRecievePacket.getPort());
-//		int len = clientRecievePacket.getLength();
-//		System.out.println("Length: " + len);
+		System.out.println("Host: Packet received: ");
 		System.out.print("Containing (String): ");
 		String received = new String(data, StandardCharsets.UTF_8);
 		System.out.println(received);
 		System.out.print("Containing (Byte): ");
-		// TODO System.out.println(Arrays.toString(data) + "\n");
 		printPacketBytes(clientRecievePacket);
 		try {
 			Thread.sleep(5000);
@@ -74,32 +59,22 @@ public class Host {
 		sendPacket = new DatagramPacket(data, clientRecievePacket.getLength(), clientRecievePacket.getAddress(),
 				SERVER_PORT_NUM);
 		System.out.println("Host: Sending packet to Server:");
-//		System.out.println("To host: " + sendPacket.getAddress());
-//		System.out.println("Destination host port: " + sendPacket.getPort());
-//		len = sendPacket.getLength();
-//		System.out.println("Length: " + len);
 		System.out.print("Containing (String): ");
 		System.out.println(new String(sendPacket.getData(), StandardCharsets.UTF_8));
 		System.out.print("Containing (Byte): ");
-		// TODO System.out.println(Arrays.toString(sendPacket.getData()));
 		printPacketBytes(sendPacket);
 		try {
-
 			sendRecieveSocket.send(sendPacket);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		date = new Date();
-		dateFormatted = formatter.format(date);
-		System.out.println("Server: packet sent at " + dateFormatted + "\n");
 
 		// Recieve response from Server
 		data = new byte[MAX_BYTE_ARRAY_SIZE];
 		serverRecievePacket = new DatagramPacket(data, data.length);
-		System.out.println("Host: Waiting for Packet from Server.");
 		try {
-			System.out.println("Waiting...");
+			System.out.println("Host: Waiting for response from Server...");
 			sendRecieveSocket.setSoTimeout(TIMEOUT_TIME);
 			sendRecieveSocket.receive(serverRecievePacket);
 			sendRecieveSocket.setSoTimeout(CANCEL_TIMEOUT);
@@ -109,20 +84,11 @@ public class Host {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		date = new Date();
-		formatter = new SimpleDateFormat("HH:mm:ss.SSS");
-		formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-		dateFormatted = formatter.format(date);
-		System.out.println("Host: Packet received at " + dateFormatted + " :");
-//		System.out.println("From host: " + serverRecievePacket.getAddress());
-//		System.out.println("Host port: " + serverRecievePacket.getPort());
-//		len = serverRecievePacket.getLength();
-//		System.out.println("Length: " + len);
+		System.out.println("Host: Packet received:");
 		System.out.print("Containing (String): ");
 		received = new String(data, StandardCharsets.UTF_8);
 		System.out.println(received);
 		System.out.print("Containing (Byte): ");
-		// TODO System.out.println(Arrays.toString(data) + "\n");
 		printPacketBytes(serverRecievePacket);
 		try {
 			Thread.sleep(5000);
@@ -135,29 +101,27 @@ public class Host {
 		sendPacket = new DatagramPacket(data, serverRecievePacket.getLength(), serverRecievePacket.getAddress(),
 				clientRecievePacket.getPort());
 		System.out.println("Host: Sending packet to Client:");
-//		System.out.println("To host: " + sendPacket.getAddress());
-//		System.out.println("Destination host port: " + sendPacket.getPort());
-//		len = sendPacket.getLength();
-//		System.out.println("Length: " + len);
 		System.out.print("Containing (String): ");
 		System.out.println(new String(sendPacket.getData(), StandardCharsets.UTF_8));
 		System.out.print("Containing (Byte): ");
 		printPacketBytes(sendPacket);
-		// TODO System.out.println(Arrays.toString(sendPacket.getData()));
 		try {
 			sendRecieveSocket.send(sendPacket);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		date = new Date();
-		dateFormatted = formatter.format(date);
-		System.out.println("Server: packet sent at " + dateFormatted + "\n");
 
 		recieveSocket.close();
 		sendRecieveSocket.close();
 	}
 
+	/**
+	 * This method is used to display the bytes of the message sent or recieved
+	 * (only show message length).
+	 * 
+	 * @param bytes DatagramPacket containing the message data to be displayed
+	 */
 	private void printPacketBytes(DatagramPacket bytes) {
 		byte bytesArray[] = bytes.getData();
 		System.out.print("[");

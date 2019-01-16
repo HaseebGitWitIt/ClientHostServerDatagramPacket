@@ -48,15 +48,10 @@ public class Client {
 				e.printStackTrace();
 				System.exit(1);
 			}
-			System.out.println("Client: Sending packet #" + a + ":");
-//			System.out.println("To host: " + sendPacket.getAddress());
-//			System.out.println("Destination host port: " + sendPacket.getPort());
-//			int len = sendPacket.getLength();
-//			System.out.println("Length: " + len);
+			System.out.println("Client: Sending packet #" + a + " to the Host:");
 			System.out.print("Containing (String): ");
 			System.out.println(new String(sendPacket.getData(), StandardCharsets.UTF_8));
 			System.out.print("Containing (Byte): ");
-			// TODO System.out.println(Arrays.toString(sendPacket.getData()) + "\n");
 			printPacketBytes(sendPacket);
 			try {
 				sendRecieveSocket.send(sendPacket);
@@ -64,16 +59,12 @@ public class Client {
 				e.printStackTrace();
 				System.exit(1);
 			}
-//			Date date = new Date();
-//			DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
-//			formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-//			String dateFormatted = formatter.format(date);
-//			System.out.println("Client: Packet sent at: " + dateFormatted + "\n");
 
 			// Recieve the response from the Host
 			byte data[] = new byte[MAX_BYTE_ARRAY_SIZE];
 			recievePacket = new DatagramPacket(data, data.length);
 			try {
+				System.out.println("Client: Waiting for response from Host...");
 				sendRecieveSocket.setSoTimeout(TIMEOUT_TIME);
 				sendRecieveSocket.receive(recievePacket);
 				sendRecieveSocket.setSoTimeout(CANCEL_TIMEOUT);
@@ -81,24 +72,24 @@ public class Client {
 				e.printStackTrace();
 				System.exit(1);
 			}
-//			date = new Date();
-//			dateFormatted = formatter.format(date);
-			System.out.println("Client: Packet received " /* + dateFormatted */ + " for message #" + a + ":");
-//			System.out.println("From host: " + recievePacket.getAddress());
-//			System.out.println("Host port: " + recievePacket.getPort());
-//			len = recievePacket.getLength();
-//			System.out.println("Length: " + len);
+			System.out.println("Client: Packet received for message #" + a + " from Host:");
 			System.out.print("Containing (String): ");
 			String received = new String(data, StandardCharsets.UTF_8);
 			System.out.println(received);
 			System.out.print("Containing (Byte): ");
-			// TODO System.out.println(Arrays.toString(data) + "\n");
 			printPacketBytes(recievePacket);
 		}
 
 		sendRecieveSocket.close();
 	}
 
+	/**
+	 * This method is used to generate the message request to be sent to the Server
+	 * via the Host.
+	 * 
+	 * @param readOrWrite If we are creating a read requiest or a write request
+	 * @return The byte array of the message to be send to the Host
+	 */
 	private byte[] getRequestMessage(String readOrWrite) {
 		String filename = "test.txt";
 		String mode = "ocTEt";
@@ -119,6 +110,16 @@ public class Client {
 
 	}
 
+	/**
+	 * This method is used to combine 5 byte arrays to create one byte array.
+	 * 
+	 * @param array1
+	 * @param array2
+	 * @param array3
+	 * @param array4
+	 * @param array5
+	 * @return The byte array composed of all 5 arrays.
+	 */
 	private byte[] combineFiveByteArrays(byte[] array1, byte[] array2, byte[] array3, byte[] array4, byte[] array5) {
 		int length = array1.length + array2.length + array3.length + array4.length + array5.length;
 		byte[] byteArray = new byte[length];
@@ -131,6 +132,12 @@ public class Client {
 		return byteArray;
 	}
 
+	/**
+	 * This method is used to display the bytes of the message sent or recieved
+	 * (only show message length).
+	 * 
+	 * @param bytes DatagramPacket containing the message data to be displayed
+	 */
 	private void printPacketBytes(DatagramPacket bytes) {
 		byte bytesArray[] = bytes.getData();
 		System.out.print("[");
